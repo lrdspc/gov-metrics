@@ -1,9 +1,9 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 
 export async function submitEvaluation(formData: FormData) {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   const unidadeId = formData.get("unidadeId") as string;
   const setorId = (formData.get("setorId") as string) || null;
