@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 
 export type DashboardMetrics = {
   totalAvaliacoes: number;
@@ -29,7 +29,7 @@ export type DashboardMetrics = {
 export async function getDashboardMetrics(
   municipioId?: string
 ): Promise<DashboardMetrics> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const totalQuery = supabase.from("avaliacoes").select("*", { count: "exact", head: true });
   const comentariosQuery = supabase.from("comentarios").select("*", { count: "exact", head: true });
@@ -61,8 +61,6 @@ export async function getDashboardMetrics(
     }
   }
 
-  const totalPontos =
-    dist.excellent * 4 + dist.good * 3 + dist.regular * 2 + dist.bad * 1;
   const satisfacaoGeral =
     totalAvaliacoes > 0
       ? Math.round(
