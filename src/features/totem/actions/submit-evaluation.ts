@@ -3,60 +3,77 @@
 import { createAdminClient } from "@/lib/supabase/server";
 
 export async function submitEvaluation(formData: FormData) {
-  const supabase = await createAdminClient();
+  try {
+    console.log("[submitEvaluation] starting...");
+    const supabase = createAdminClient();
 
-  const unidadeId = formData.get("unidadeId") as string;
-  const setorId = (formData.get("setorId") as string) || null;
-  const notaRaw = formData.get("nota") as string;
-  const comentario = (formData.get("comentario") as string) || null;
-  const canal = (formData.get("canal") as string) || "totem";
-  const sessionId = (formData.get("sessionId") as string) || null;
-  const totemId = (formData.get("totemId") as string) || null;
+    const unidadeId = formData.get("unidadeId") as string;
+    const setorId = (formData.get("setorId") as string) || null;
+    const notaRaw = formData.get("nota") as string;
+    const comentario = (formData.get("comentario") as string) || null;
+    const canal = (formData.get("canal") as string) || "totem";
+    const sessionId = (formData.get("sessionId") as string) || null;
+    const totemId = (formData.get("totemId") as string) || null;
 
-  if (!["excellent", "good", "regular", "bad"].includes(notaRaw)) {
-    return { error: "Nota invalida" };
-  }
-  const nota = notaRaw as "excellent" | "good" | "regular" | "bad";
+    console.log("[submitEvaluation] nota:", notaRaw, "unidade:", unidadeId);
 
-  const { data: unidade, error: errUnidade } = await supabase
-    .from("unidades")
-    .select("id, municipio_id, secretaria_id")
-    .eq("id", unidadeId)
-    .single();
+    if (!["excellent", "good", "regular", "bad"].includes(notaRaw)) {
+      console.log("[submitEvaluation] nota invalida");
+      return { error: "Nota invalida" };
+    }
+    const nota = notaRaw as "excellent" | "good" | "regular" | "bad";
 
-  if (errUnidade || !unidade) {
-    return { error: "Unidade nao encontrada" };
-  }
+    const { data: unidade, error: errUnidade } = await supabase
+      .from("unidades")
+      .select("id, municipio_id, secretaria_id")
+      .eq("id", unidadeId)
+      .single();
 
-  const { error: errAvaliacao } = await supabase.from("avaliacoes").insert({
-    municipio_id: unidade.municipio_id,
-    secretaria_id: unidade.secretaria_id,
-    unidade_id: unidadeId,
-    setor_id: setorId || null,
-    nota,
-    canal,
-    session_id: sessionId,
-    totem_id: totemId,
-  });
+    if (errUnidade || !unidade) {
+      console.log("[submitEvaluation] erro unidade:", errUnidade?.message ?? "nao encontrada");
+      return { error: "Unidade nao encontrada" };
+    }
 
-  if (errAvaliacao) {
-    return { error: errAvaliacao.message };
-  }
+    console.log("[submitEvaluation] unidade ok:", unidade.id);
 
-  if (comentario && comentario.trim()) {
-    const { error: errComentario } = await supabase.from("comentarios").insert({
+    const { error: errAvaliacao } = await supabase.from("avaliacoes").insert({
       municipio_id: unidade.municipio_id,
       secretaria_id: unidade.secretaria_id,
       unidade_id: unidadeId,
       setor_id: setorId || null,
-      comentario: comentario.trim(),
-      anonimo: true,
+      nota,
+      canal,
+      session_id: sessionId,
+      totem_id: totemId,
     });
 
-    if (errComentario) {
-      return { error: errComentario.message };
+    if (errAvaliacao) {
+      console.log("[submitEvaluation] erro avaliacao:", errAvaliacao.message);
+      return { error: errAvaliacao.message };
     }
-  }
 
-  return { success: true };
+    console.log("[submitEvaluation] avaliacao ok");
+
+    if (comentario && comentario.trim()) {
+      const { error: errComentario } = await supabase.from("comentarios").insert({
+        municipio_id: unidade.municipio_id,
+        secretaria_id: unidade.secretaria_id,
+        unidade_id: unidadeId,
+        setor_id: setorId || null,
+        comentario: comentario.trim(),
+        anonimo: true,
+      });
+
+      if (errComentario) {
+        console.log("[submitEvaluation] erro comentario:", errComentario.message);
+        return { error: errComentario.message };
+      }
+    }
+
+    console.log("[submitEvaluation] sucesso");
+    return { success: true };
+  } catch (err) {
+    console.error("[submitEvaluation] exception:", err);
+    return { error: err instanceof Error ? err.message : "Erro interno" };
+  }
 }
