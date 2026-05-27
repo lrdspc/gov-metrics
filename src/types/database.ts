@@ -1001,6 +1001,32 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      fn_distribuicao_notas: {
+        Args: never
+        Returns: {
+          nota: string
+          total: number
+        }[]
+      }
+      fn_evolucao_satisfacao: {
+        Args: never
+        Returns: {
+          periodo: string
+          satisfacao: number
+          total: number
+        }[]
+      }
+      fn_ranking_unidades: {
+        Args: never
+        Returns: {
+          media: number
+          satisfacao: number
+          tipo: string
+          total: number
+          unidade_id: string
+          unidade_nome: string
+        }[]
+      }
       fn_usuario_municipio: { Args: never; Returns: string }
       fn_usuario_papel: {
         Args: never
