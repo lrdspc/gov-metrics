@@ -11,6 +11,7 @@ export async function submitEvaluation(formData: FormData) {
   const comentario = (formData.get("comentario") as string) || null;
   const canal = (formData.get("canal") as string) || "totem";
   const sessionId = (formData.get("sessionId") as string) || null;
+  const totemId = (formData.get("totemId") as string) || null;
 
   if (!["excellent", "good", "regular", "bad"].includes(notaRaw)) {
     return { error: "Nota invalida" };
@@ -35,6 +36,7 @@ export async function submitEvaluation(formData: FormData) {
     nota,
     canal,
     session_id: sessionId,
+    totem_id: totemId,
   });
 
   if (errAvaliacao) {

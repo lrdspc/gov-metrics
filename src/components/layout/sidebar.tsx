@@ -11,6 +11,7 @@ import {
   FileText,
   LogOut,
   Building2,
+  Tablet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
@@ -18,6 +19,7 @@ import { useRouter } from "next/navigation";
 
 const links = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/dashboard/totens", label: "Totens", icon: Tablet },
   { href: "/dashboard/reports", label: "Relatorios", icon: FileText },
   { href: "/dashboard/comments", label: "Comentarios", icon: MessageSquare },
   { href: "/dashboard/alerts", label: "Alertas", icon: Bell },

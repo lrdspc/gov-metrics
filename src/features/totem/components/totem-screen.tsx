@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { toast } from "sonner";
 import { useFullscreen } from "../hooks/use-fullscreen";
 import { useTotemTimer } from "../hooks/use-totem-timer";
 import { submitEvaluation } from "../actions/submit-evaluation";
@@ -16,6 +17,7 @@ interface TotemScreenProps {
   setorId?: string;
   unidadeNome?: string;
   canal?: string;
+  totemId?: string;
 }
 
 export function TotemScreen({
@@ -23,6 +25,7 @@ export function TotemScreen({
   setorId,
   unidadeNome,
   canal = "totem",
+  totemId,
 }: TotemScreenProps) {
   const [step, setStep] = useState<Step>("welcome");
 
@@ -54,6 +57,7 @@ export function TotemScreen({
       formData.set("nota", nota);
       formData.set("canal", canal);
       formData.set("sessionId", crypto.randomUUID());
+      if (totemId) formData.set("totemId", totemId);
       if (comentario) formData.set("comentario", comentario);
 
       const result = await submitEvaluation(formData);
@@ -61,10 +65,12 @@ export function TotemScreen({
       if (result.success) {
         setStep("thank-you");
       } else {
+        console.error("Erro ao enviar avaliacao:", result.error);
+        toast.error("Erro ao enviar avaliacao. Tente novamente.");
         setStep("thank-you");
       }
     },
-    [unidadeId, setorId, canal, timer]
+    [unidadeId, setorId, canal, timer, totemId]
   );
 
   const handleComplete = useCallback(() => {

@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       alertas_config: {
@@ -221,6 +246,7 @@ export type Database = {
           secretaria_id: string
           session_id: string | null
           setor_id: string | null
+          totem_id: string | null
           unidade_id: string
           user_id: string | null
         }
@@ -238,6 +264,7 @@ export type Database = {
           secretaria_id: string
           session_id?: string | null
           setor_id?: string | null
+          totem_id?: string | null
           unidade_id: string
           user_id?: string | null
         }
@@ -255,10 +282,19 @@ export type Database = {
           secretaria_id?: string
           session_id?: string | null
           setor_id?: string | null
+          totem_id?: string | null
           unidade_id?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "avaliacoes_totem_id_fkey"
+            columns: ["totem_id"]
+            isOneToOne: false
+            referencedRelation: "totens"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       avaliacoes_default: {
         Row: {
@@ -275,6 +311,7 @@ export type Database = {
           secretaria_id: string
           session_id: string | null
           setor_id: string | null
+          totem_id: string | null
           unidade_id: string
           user_id: string | null
         }
@@ -292,6 +329,7 @@ export type Database = {
           secretaria_id: string
           session_id?: string | null
           setor_id?: string | null
+          totem_id?: string | null
           unidade_id: string
           user_id?: string | null
         }
@@ -309,6 +347,7 @@ export type Database = {
           secretaria_id?: string
           session_id?: string | null
           setor_id?: string | null
+          totem_id?: string | null
           unidade_id?: string
           user_id?: string | null
         }
@@ -930,6 +969,85 @@ export type Database = {
           },
         ]
       }
+      totens: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          criado_por: string | null
+          deleted_at: string | null
+          id: string
+          localizacao: string | null
+          municipio_id: string
+          nome: string
+          setor_id: string | null
+          slug: string
+          status: Database["public"]["Enums"]["totem_status"]
+          total_avaliacoes: number
+          ultima_avaliacao_em: string | null
+          ultimo_heartbeat: string | null
+          unidade_id: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          criado_por?: string | null
+          deleted_at?: string | null
+          id?: string
+          localizacao?: string | null
+          municipio_id: string
+          nome: string
+          setor_id?: string | null
+          slug: string
+          status?: Database["public"]["Enums"]["totem_status"]
+          total_avaliacoes?: number
+          ultima_avaliacao_em?: string | null
+          ultimo_heartbeat?: string | null
+          unidade_id: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          criado_por?: string | null
+          deleted_at?: string | null
+          id?: string
+          localizacao?: string | null
+          municipio_id?: string
+          nome?: string
+          setor_id?: string | null
+          slug?: string
+          status?: Database["public"]["Enums"]["totem_status"]
+          total_avaliacoes?: number
+          ultima_avaliacao_em?: string | null
+          ultimo_heartbeat?: string | null
+          unidade_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "totens_municipio_id_fkey"
+            columns: ["municipio_id"]
+            isOneToOne: false
+            referencedRelation: "municipios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "totens_setor_id_fkey"
+            columns: ["setor_id"]
+            isOneToOne: false
+            referencedRelation: "setores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "totens_unidade_id_fkey"
+            columns: ["unidade_id"]
+            isOneToOne: false
+            referencedRelation: "unidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       unidades: {
         Row: {
           ativa: boolean
@@ -1027,6 +1145,7 @@ export type Database = {
           unidade_nome: string
         }[]
       }
+      fn_totem_heartbeat: { Args: { p_slug: string }; Returns: Json }
       fn_usuario_municipio: { Args: never; Returns: string }
       fn_usuario_papel: {
         Args: never
@@ -1045,6 +1164,7 @@ export type Database = {
       relatorio_formato: "pdf" | "xlsx" | "csv" | "json"
       relatorio_status: "pending" | "generating" | "completed" | "failed"
       sentimento: "positive" | "neutral" | "negative" | "mixed" | "not_analyzed"
+      totem_status: "online" | "offline" | "disabled"
       unidade_tipo:
         | "upa"
         | "ubs"
@@ -1181,6 +1301,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       alerta_severidade: ["low", "medium", "high", "critical"],
@@ -1195,6 +1318,7 @@ export const Constants = {
       relatorio_formato: ["pdf", "xlsx", "csv", "json"],
       relatorio_status: ["pending", "generating", "completed", "failed"],
       sentimento: ["positive", "neutral", "negative", "mixed", "not_analyzed"],
+      totem_status: ["online", "offline", "disabled"],
       unidade_tipo: [
         "upa",
         "ubs",
