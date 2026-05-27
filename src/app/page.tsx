@@ -56,6 +56,9 @@ export default function Home() {
             <Link href="/login" className={cn(buttonVariants({ variant: "outline" }))}>
               Entrar
             </Link>
+            <Link href="/signup" className={cn(buttonVariants({ variant: "outline" }))}>
+              Cadastro
+            </Link>
             <Link href="/transparency" className={cn(buttonVariants())}>
               Transparência
             </Link>
